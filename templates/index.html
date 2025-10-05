@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreatorVerse - AI-Powered Content Creation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+    <nav class="navbar glass">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="CreatorVerse" class="logo">
+                <span class="logo-text">CreatorVerse</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#about" class="nav-link">About</a>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+                <a href="{{ url_for('login') }}" class="btn-login">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title glitch" data-text="CreatorVerse">CreatorVerse</h1>
+                    <p class="hero-subtitle">AI-Powered Content Creation Platform</p>
+                    <p class="hero-description">
+                        Generate innovative ideas, plan your content calendar, and unleash your creativity 
+                        with our futuristic AI assistant.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="{{ url_for('signup') }}" class="btn-primary">Get Started</a>
+                        <a href="{{ url_for('login') }}" class="btn-secondary">Login</a>
+                        <a href="#features" class="btn-secondary">Explore Features</a>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="floating-cards">
+                        <div class="card glass floating-1">
+                            <h3>AI Ideas</h3>
+                            <p>Generate unique content concepts</p>
+                        </div>
+                        <div class="card glass floating-2">
+                            <h3>Smart Calendar</h3>
+                            <p>Plan your content schedule</p>
+                        </div>
+                        <div class="card glass floating-3">
+                            <h3>Analytics</h3>
+                            <p>Track your creative journey</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features">
+            <div class="container">
+                <h2 class="section-title">Powerful Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card glass">
+                        <div class="feature-icon">🤖</div>
+                        <h3>AI Idea Generation</h3>
+                        <p>Generate 5 unique content ideas instantly using advanced AI technology</p>
+                    </div>
+                    <div class="feature-card glass">
+                        <div class="feature-icon">📅</div>
+                        <h3>Content Calendar</h3>
+                        <p>Schedule and manage your content with our intuitive calendar system</p>
+                    </div>
+                    <div class="feature-card glass">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Creative Dashboard</h3>
+                        <p>Organize and categorize your ideas in a beautiful, futuristic interface</p>
+                    </div>
+                    <div class="feature-card glass">
+                        <div class="feature-icon">👑</div>
+                        <h3>Admin Portal</h3>
+                        <p>Comprehensive management tools for platform administrators</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer glass">
+        <div class="container">
+            <p>&copy; 2024 CreatorVerse. Unleash your creativity.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
