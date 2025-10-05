@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CreatorVerse</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+    <nav class="navbar glass">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="CreatorVerse" class="logo">
+                <span class="logo-text">CreatorVerse Admin</span>
+            </div>
+            <div class="nav-links">
+                <span class="admin-welcome">Welcome, Admin!</span>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+                <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="admin-main">
+        <div class="container">
+            <div class="admin-header">
+                <h1>👑 Admin Dashboard</h1>
+                <p>Platform Management & Analytics</p>
+            </div>
+
+            <!-- Statistics Cards -->
+            <section class="stats-grid">
+                <div class="stat-card glass">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-info">
+                        <h3>{{ stats.total_users }}</h3>
+                        <p>Total Users</p>
+                    </div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-icon">💡</div>
+                    <div class="stat-info">
+                        <h3>{{ stats.total_ideas }}</h3>
+                        <p>Total Ideas</p>
+                    </div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-info">
+                        <h3>{{ stats.total_schedules }}</h3>
+                        <p>Scheduled Tasks</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Management -->
+            <section class="management-section glass">
+                <h2>👥 User Management</h2>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Joined</th>
+                                <th>Ideas Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ user.ideas|length }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Ideas Management -->
+            <section class="management-section glass">
+                <h2>💡 Ideas Overview</h2>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>User</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for idea in ideas %}
+                            <tr>
+                                <td>{{ idea.id }}</td>
+                                <td>{{ idea.title }}</td>
+                                <td><span class="category-badge">{{ idea.category }}</span></td>
+                                <td>{{ idea.user.username }}</td>
+                                <td>{{ idea.created_at.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Schedules Overview -->
+            <section class="management-section glass">
+                <h2>📅 Content Schedules</h2>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Task</th>
+                                <th>User</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for schedule in schedules %}
+                            <tr>
+                                <td>{{ schedule.id }}</td>
+                                <td>{{ schedule.date }}</td>
+                                <td>{{ schedule.task }}</td>
+                                <td>{{ schedule.user.username }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
