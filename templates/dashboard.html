@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CreatorVerse</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+    <nav class="navbar glass">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="CreatorVerse" class="logo">
+                <span class="logo-text">CreatorVerse</span>
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('dashboard') }}" class="nav-link active">Dashboard</a>
+                <a href="{{ url_for('calendar') }}" class="nav-link">Calendar</a>
+                <span class="user-welcome">Welcome, {{ session.username }}!</span>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+                <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard-main">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Creator Dashboard</h1>
+                <p>Generate and manage your content ideas</p>
+            </div>
+
+            <!-- AI Idea Generator -->
+            <section class="ai-generator glass">
+                <h2>🤖 AI Idea Generator</h2>
+                <div class="generator-form">
+                    <input type="text" id="topic-input" placeholder="Enter a topic (e.g., 'sustainable living', 'tech reviews')" class="form-input">
+                    <button onclick="generateIdeas()" class="btn-primary" id="generate-btn">Generate Ideas</button>
+                </div>
+                <div id="ai-results" class="ai-results"></div>
+            </section>
+
+            <!-- Manual Idea Addition -->
+            <section class="manual-idea glass">
+                <h2>➕ Add Manual Idea</h2>
+                <form id="manual-idea-form" class="idea-form">
+                    <div class="form-group">
+                        <input type="text" id="idea-title" placeholder="Idea Title" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="idea-description" placeholder="Description" class="form-input" required rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <select id="idea-category" class="form-input" required>
+                            <option value="">Select Category</option>
+                            <option value="YouTube">YouTube</option>
+                            <option value="Blog">Blog</option>
+                            <option value="Social Media">Social Media</option>
+                            <option value="Podcast">Podcast</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary" id="add-idea-btn">Add Idea</button>
+                </form>
+            </section>
+
+            <!-- Saved Ideas -->
+            <section class="saved-ideas">
+                <h2>💡 Your Saved Ideas</h2>
+                <div class="ideas-grid">
+                    {% for idea in ideas %}
+                    <div class="idea-card glass">
+                        <div class="idea-header">
+                            <h3>{{ idea.title }}</h3>
+                            <span class="idea-category">{{ idea.category }}</span>
+                        </div>
+                        <p class="idea-description">{{ idea.description }}</p>
+                        <div class="idea-footer">
+                            <small>{{ idea.created_at.strftime('%Y-%m-%d') }}</small>
+                            <a href="{{ url_for('delete_idea', idea_id=idea.id) }}" class="btn-delete" onclick="return confirm('Are you sure you want to delete this idea?')">Delete</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="no-ideas glass">
+                        <p>No ideas yet. Start generating some creative content!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // AI Idea Generation
+        async function generateIdeas() {
+            const topic = document.getElementById('topic-input').value;
+            const resultsDiv = document.getElementById('ai-results');
+            const generateBtn = document.getElementById('generate-btn');
+            
+            if (!topic) {
+                alert('Please enter a topic');
+                return;
+            }
+
+            // Show loading state
+            generateBtn.innerHTML = 'Generating...';
+            generateBtn.disabled = true;
+            resultsDiv.innerHTML = '<div class="loading">🔄 Generating creative ideas... This may take a few seconds.</div>';
+
+            try {
+                const response = await fetch('/generate_idea', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ topic: topic })
+                });
+
+                const data = await response.json();
+                
+                if (data.ideas) {
+                    let html = '<h3>Generated Ideas:</h3><ul class="ideas-list">';
+                    data.ideas.forEach(idea => {
+                        html += `<li class="idea-item">${idea}</li>`;
+                    });
+                    html += '</ul>';
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = `<div class="error">Error: ${data.error || 'Unknown error occurred'}</div>`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultsDiv.innerHTML = `<div class="error">Network error. Please check your connection and try again.</div>`;
+            } finally {
+                // Reset button state
+                generateBtn.innerHTML = 'Generate Ideas';
+                generateBtn.disabled = false;
+            }
+        }
+
+        // Manual Idea Form Submission
+        document.getElementById('manual-idea-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('idea-title').value;
+            const description = document.getElementById('idea-description').value;
+            const category = document.getElementById('idea-category').value;
+            const addBtn = document.getElementById('add-idea-btn');
+            
+            if (!title || !description || !category) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // Show loading state
+            const originalText = addBtn.innerHTML;
+            addBtn.innerHTML = 'Adding Idea...';
+            addBtn.disabled = true;
+
+            try {
+                const formData = {
+                    title: title,
+                    description: description,
+                    category: category
+                };
+
+                const response = await fetch('/add_idea', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (data.message) {
+                    // Success - reload page to show new idea
+                    window.location.reload();
+                } else {
+                    throw new Error(data.error || 'Failed to add idea');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding idea: ' + error.message);
+                
+                // Reset button state
+                addBtn.innerHTML = originalText;
+                addBtn.disabled = false;
+            }
+        });
+
+        // Theme toggle function
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.querySelector('.theme-toggle');
+            
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                body.classList.add('light-mode');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.remove('light-mode');
+                body.classList.add('dark-mode');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Initialize theme from localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            const themeToggle = document.querySelector('.theme-toggle');
+            
+            if (savedTheme === 'light') {
+                document.body.classList.remove('dark-mode');
+                document.body.classList.add('light-mode');
+                if (themeToggle) themeToggle.textContent = '☀️';
+            }
+        });
+    </script>
+</body>
+</html>
