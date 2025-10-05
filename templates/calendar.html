@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - CreatorVerse</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+    <nav class="navbar glass">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="CreatorVerse" class="logo">
+                <span class="logo-text">CreatorVerse</span>
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('calendar') }}" class="nav-link active">Calendar</a>
+                <span class="user-welcome">Welcome, {{ session.username }}!</span>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+                <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="calendar-main">
+        <div class="container">
+            <div class="calendar-header">
+                <h1>📅 Content Calendar</h1>
+                <p>Schedule and manage your content plans</p>
+            </div>
+
+            <!-- Add Schedule Form -->
+            <section class="add-schedule glass">
+                <h2>Add New Schedule</h2>
+                <form id="schedule-form" class="schedule-form">
+                    <div class="form-group">
+                        <label for="schedule-date">Date</label>
+                        <input type="date" id="schedule-date" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="schedule-task">Task/Content</label>
+                        <textarea id="schedule-task" placeholder="Describe your content task..." class="form-input" required rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" id="add-schedule-btn">Add to Calendar</button>
+                </form>
+            </section>
+
+            <!-- Scheduled Tasks -->
+            <section class="scheduled-tasks">
+                <h2>Your Scheduled Content</h2>
+                <div class="tasks-grid">
+                    {% for schedule in schedules %}
+                    <div class="task-card glass">
+                        <div class="task-date">
+                            <span class="date-badge">{{ schedule.date }}</span>
+                        </div>
+                        <div class="task-content">
+                            <p>{{ schedule.task }}</p>
+                        </div>
+                        <div class="task-actions">
+                            <a href="{{ url_for('delete_schedule', schedule_id=schedule.id) }}" class="btn-delete" onclick="return confirm('Are you sure you want to delete this schedule?')">Delete</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="no-tasks glass">
+                        <p>No scheduled tasks yet. Plan your content calendar!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Schedule Form Submission
+        document.getElementById('schedule-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const date = document.getElementById('schedule-date').value;
+            const task = document.getElementById('schedule-task').value;
+            const addBtn = document.getElementById('add-schedule-btn');
+            
+            if (!date || !task) {
+                alert('Please fill in both date and task fields');
+                return;
+            }
+
+            // Show loading state
+            const originalText = addBtn.innerHTML;
+            addBtn.innerHTML = 'Adding Schedule...';
+            addBtn.disabled = true;
+
+            try {
+                const formData = {
+                    date: date,
+                    task: task
+                };
+
+                const response = await fetch('/add_schedule', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (data.message) {
+                    // Success - reload page to show new schedule
+                    window.location.reload();
+                } else {
+                    throw new Error(data.error || 'Failed to add schedule');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding schedule: ' + error.message);
+                
+                // Reset button state
+                addBtn.innerHTML = originalText;
+                addBtn.disabled = false;
+            }
+        });
+
+        // Theme toggle function
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.querySelector('.theme-toggle');
+            
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                body.classList.add('light-mode');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.remove('light-mode');
+                body.classList.add('dark-mode');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Initialize theme from localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            const themeToggle = document.querySelector('.theme-toggle');
+            
+            if (savedTheme === 'light') {
+                document.body.classList.remove('dark-mode');
+                document.body.classList.add('light-mode');
+                if (themeToggle) themeToggle.textContent = '☀️';
+            }
+
+            // Set today's date as default
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('schedule-date').value = formattedDate;
+        });
+    </script>
+</body>
+</html>
