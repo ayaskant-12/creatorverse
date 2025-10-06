@@ -146,6 +146,7 @@ creatorverse/
     ├── calendar.html     # Content calendar
     ├── admin.html        # Admin dashboard
     └── admin_login.html  # Admin login page
+```
 ## 🔧 API Endpoints
 ### User Routes
 GET / - Landing page
