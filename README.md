@@ -123,7 +123,7 @@ Admin: admin / admin123
 Users: Register through the signup page
 
 ## 📁 Project Structure
-text
+```text
 creatorverse/
 ├── app.py                 # Main Flask application
 ├── requirements.txt       # Python dependencies
